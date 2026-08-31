@@ -389,7 +389,7 @@
   <div id="cbt-app-wrapper">
     <div class="cbt-card">
       
-      <!-- LAYAR 1: PILIH MAPEL -->
+      <!-- LAYAR 1: PILIH MAPEL (15 MAPEL REGULER) -->
       <div class="screen active" id="screen-mapel">
         <div class="cbt-header">
           <h2>DIPSA EXAM CENTER</h2>
@@ -397,23 +397,20 @@
           <p style="font-size: 12px; color: #888; margin-top: 4px;">Pilih Mata Pelajaran untuk Mengerjakan Ujian</p>
         </div>
         <div class="mapel-grid">
-          <button class="btn-mapel" onclick="pilihMapel('Latihan')">📝 Latihan</button>
-          <button class="btn-mapel" onclick="pilihMapel('Matematika')">📐 Matematika</button>
           <button class="btn-mapel" onclick="pilihMapel('Bahasa_Indonesia')">📖 Bahasa Indonesia</button>
-          <button class="btn-mapel" onclick="pilihMapel('Bahasa_Inggris')">🇬🇧 Bahasa Inggris</button>
           <button class="btn-mapel" onclick="pilihMapel('PAI')">🕌 PAI</button>
-          <button class="btn-mapel" onclick="pilihMapel('PIPAS')">🔬 PIPAS</button>
-          <button class="btn-mapel" onclick="pilihMapel('Pancasila')">🇮🇩 Pancasila</button>
           <button class="btn-mapel" onclick="pilihMapel('Informatika')">💻 Informatika</button>
-          <button class="btn-mapel" onclick="pilihMapel('Dasar_MP')">💼 Dasar MP</button>
-          <button class="btn-mapel" onclick="pilihMapel('Dasar_TSM1')">🔧 Dasar TSM1</button>
-          <button class="btn-mapel" onclick="pilihMapel('Dasar_DKV1')">🎨 Dasar DKV1</button>
-          <button class="btn-mapel" onclick="pilihMapel('Penjasorkes')">⚽ Penjasorkes</button>
+          <button class="btn-mapel" onclick="pilihMapel('Matematika')">📐 Matematika</button>
           <button class="btn-mapel" onclick="pilihMapel('Sejarah')">🏛️ Sejarah</button>
+          <button class="btn-mapel" onclick="pilihMapel('Dasar_DKV')">🎨 Dasar DKV</button>
+          <button class="btn-mapel" onclick="pilihMapel('Dasar_MP')">💼 Dasar MP</button>
+          <button class="btn-mapel" onclick="pilihMapel('Dasar_TSM')">🔧 Dasar TSM</button>
+          <button class="btn-mapel" onclick="pilihMapel('Bahasa_Inggris')">🇬🇧 Bahasa Inggris</button>
+          <button class="btn-mapel" onclick="pilihMapel('Penjasorkes')">⚽ Penjasorkes</button>
+          <button class="btn-mapel" onclick="pilihMapel('Pancasila')">🇮🇩 Pancasila</button>
+          <button class="btn-mapel" onclick="pilihMapel('PIPAS')">🔬 PIPAS</button>
           <button class="btn-mapel" onclick="pilihMapel('Seni_Budaya')">🎭 Seni Budaya</button>
           <button class="btn-mapel" onclick="pilihMapel('KKA')">🤝 KKA</button>
-          <button class="btn-mapel" onclick="pilihMapel('Dasar_TSM2')">🔧 Dasar TSM2</button>
-          <button class="btn-mapel" onclick="pilihMapel('Dasar_DKV2')">🎨 Dasar DKV2</button>
           <button class="btn-mapel" onclick="pilihMapel('Basa_Jawa')">🗣️ Basa Jawa</button>
         </div>
         <div class="loading" id="loading-mapel">Memeriksa jadwal ujian...</div>
@@ -558,7 +555,7 @@
   </div>
 
   <script>
-    // URL APPSCRIPT KELAS X TERBARU
+    // URL APPSCRIPT KELAS X (BISA MENGGUNAKAN SKRIP KELAS X INKLUSI)
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxtS3Bc94opvHSprJuTrLOK86Ay5QyZCZjznNVzgdzO6mc-MXejiqf9DnISKZjV0iJepA/exec";
 
     let selectedMapel = "";
@@ -858,7 +855,7 @@
       e.preventDefault();
 
       const btnStart = document.getElementById("btn-start-exam");
-      // CEK JIKA TOMBOL SUDAH DIKLIK, CEGAH KLIK KEDUA (DOUBLE CLICK)
+      // CEK JIKA TOMBOL SUDAH DIKLIK, CEGAH KLIK KEDUA (DOUBLE CLICK PROTECTION)
       if (btnStart.disabled) return; 
 
       const tokenVal = document.getElementById("token-input").value.trim();
@@ -874,7 +871,7 @@
         `&token=${encodeURIComponent(tokenVal)}` +
         `&nama=${encodeURIComponent(userData ? userData.nama : '')}` +
         `&kelas=${encodeURIComponent(userData ? userData.kelas : '')}` +
-        `&ruang=${encodeURIComponent(userData ? userData.ruang : '')}`;
+        `&ruang=${encodeURIComponent(userData ? userData.ruang || '-' : '-')}`;
 
       fetch(urlFetch)
         .then(res => res.json())
@@ -884,7 +881,7 @@
             listSoalData = acakArray(data.soal);
             if (data.durasi) durasiMenitMapel = data.durasi;
             
-            // AKTIFKAN FULLSCREEN & WAKE LOCK SAAT TOMBOL MULAI DIKLIK
+            // AKTIFKAN FULLSCREEN & WAKE LOCK TEPA SAAT TOKEN DITERIMA VALID
             requestFullscreenMode();
             aktifkanWakeLock();
 
