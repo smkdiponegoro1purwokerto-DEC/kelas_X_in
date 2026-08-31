@@ -857,9 +857,16 @@
     function prosesToken(e) {
       e.preventDefault();
 
+      const btnStart = document.getElementById("btn-start-exam");
+      // CEK JIKA TOMBOL SUDAH DIKLIK, CEGAH KLIK KEDUA (DOUBLE CLICK)
+      if (btnStart.disabled) return; 
+
       const tokenVal = document.getElementById("token-input").value.trim();
       document.getElementById("loading-token").style.display = "block";
       document.getElementById("err-token").innerText = "";
+
+      // NONAKTIFKAN TOMBOL SEMENTARA WAKTU MEMPROSES REQUEST
+      btnStart.disabled = true;
 
       // MENGIRIM DENGAN PARAMETER LENGKAP TERMASUK NAMA, KELAS, & RUANG UNTUK LOG MONITORING
       const urlFetch = `${WEB_APP_URL}?action=getSoal` +
@@ -883,10 +890,14 @@
 
             mulaiMengerjakanSoal();
           } else {
+            // JIKA TOKEN SALAH, BUKA KEMBALI KUNCI TOMBOL
+            btnStart.disabled = false;
             document.getElementById("err-token").innerText = data.message;
           }
         })
         .catch(err => {
+          // JIKA ERROR KONEKSI, BUKA KEMBALI KUNCI TOMBOL
+          btnStart.disabled = false;
           document.getElementById("loading-token").style.display = "none";
           document.getElementById("err-token").innerText = "Gagal memuat soal!";
         });
@@ -1202,6 +1213,7 @@
 
       document.getElementById("form-login").reset();
       document.getElementById("form-token").reset();
+      document.getElementById("btn-start-exam").disabled = false;
       document.getElementById("err-login").innerText = "";
       document.getElementById("err-token").innerText = "";
 
