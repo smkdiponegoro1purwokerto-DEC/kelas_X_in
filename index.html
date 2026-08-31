@@ -558,7 +558,8 @@
   </div>
 
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxvk6M3v3hBsJDQV3fppc8tPxINEK8oHrrhYy_Uu_i8A8eM2LC6rzDu9kX63N7n6Ggf/exec";
+    // URL APPSCRIPT KELAS X TERBARU
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxtS3Bc94opvHSprJuTrLOK86Ay5QyZCZjznNVzgdzO6mc-MXejiqf9DnISKZjV0iJepA/exec";
 
     let selectedMapel = "";
     let userData = null;
@@ -573,6 +574,26 @@
     let countdownInterval = null;
     let examTimerInterval = null;
     let cameraStream = null;
+    let wakeLock = null;
+
+    /* FITUR PENJAGA LAYAR SUPAYA TETAP NYALA (SCREEN WAKE LOCK) */
+    async function aktifkanWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {
+        console.log("Wake Lock Error / Tidak Didukung:", err.message);
+      }
+    }
+
+    function matikanWakeLock() {
+      if (wakeLock !== null) {
+        wakeLock.release().then(() => {
+          wakeLock = null;
+        }).catch(err => console.log("Gagal melepas Wake Lock:", err));
+      }
+    }
 
     function acakArray(array) {
       let currentIndex = array.length, randomIndex;
@@ -605,7 +626,6 @@
 
     function pilihMapel(mapel) {
       selectedMapel = mapel;
-      requestFullscreenMode();
       document.getElementById("label-mapel-login").innerText = "Ujian: " + mapel.replace(/_/g, ' ');
       
       document.getElementById("loading-mapel").style.display = "block";
@@ -703,6 +723,18 @@
       }
     }
 
+    function exitFullscreenMode() {
+      if (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(err => console.log("Exit Fullscreen error:", err));
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      }
+    }
+
     /* FUNGSI MENGAKTIFKAN KAMERA DEPAN */
     function aktifkanKameraDepan() {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -788,7 +820,6 @@
 
     function prosesLogin(e) {
       e.preventDefault();
-      requestFullscreenMode();
       
       const userVal = document.getElementById("username").value.trim();
       const passVal = document.getElementById("password").value.trim();
@@ -825,19 +856,31 @@
 
     function prosesToken(e) {
       e.preventDefault();
-      requestFullscreenMode();
 
       const tokenVal = document.getElementById("token-input").value.trim();
       document.getElementById("loading-token").style.display = "block";
       document.getElementById("err-token").innerText = "";
 
-      fetch(`${WEB_APP_URL}?action=getSoal&mapel=${encodeURIComponent(selectedMapel)}&token=${encodeURIComponent(tokenVal)}`)
+      // MENGIRIM DENGAN PARAMETER LENGKAP TERMASUK NAMA, KELAS, & RUANG UNTUK LOG MONITORING
+      const urlFetch = `${WEB_APP_URL}?action=getSoal` +
+        `&mapel=${encodeURIComponent(selectedMapel)}` +
+        `&token=${encodeURIComponent(tokenVal)}` +
+        `&nama=${encodeURIComponent(userData ? userData.nama : '')}` +
+        `&kelas=${encodeURIComponent(userData ? userData.kelas : '')}` +
+        `&ruang=${encodeURIComponent(userData ? userData.ruang : '')}`;
+
+      fetch(urlFetch)
         .then(res => res.json())
         .then(data => {
           document.getElementById("loading-token").style.display = "none";
           if (data.status === "success") {
             listSoalData = acakArray(data.soal);
             if (data.durasi) durasiMenitMapel = data.durasi;
+            
+            // AKTIFKAN FULLSCREEN & WAKE LOCK SAAT TOMBOL MULAI DIKLIK
+            requestFullscreenMode();
+            aktifkanWakeLock();
+
             mulaiMengerjakanSoal();
           } else {
             document.getElementById("err-token").innerText = data.message;
@@ -945,7 +988,7 @@
         btnFinish.style.display = "none";
       }
 
-      // EKSEKUSI RE-RENDER MATHJAX V2 DENGAN JEDA WAKTU SECARA PASTI
+      // RE-RENDER MATHJAX V2 DENGAN JEDA WAKTU SECARA PASTI
       setTimeout(() => {
         if (window.MathJax && window.MathJax.Hub) {
           MathJax.Hub.Queue(["Typeset", MathJax.Hub, "cbt-app-wrapper"]);
@@ -1058,6 +1101,8 @@
       document.addEventListener("visibilitychange", function() {
         if (document.hidden) {
           eksekusiCekPelanggaran();
+        } else if (isExamActive) {
+          aktifkanWakeLock();
         }
       });
     }
@@ -1117,7 +1162,6 @@
         document.getElementById("loading-submit").style.display = "none";
         matikanKamera();
         switchScreen("screen-selesai");
-        if (document.exitFullscreen) document.exitFullscreen();
       })
       .catch(err => {
         if (retryCount < 5) {
@@ -1137,6 +1181,8 @@
       if (examTimerInterval) clearInterval(examTimerInterval);
       
       matikanKamera();
+      matikanWakeLock();
+      exitFullscreenMode();
 
       selectedMapel = "";
       userData = null;
